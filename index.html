@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questionário</title>
+    <script src="./data.js"></script>
+    <style>
+        .form-container {
+            width: 80%;
+            margin: 20px auto;
+            font-family: Arial, sans-serif;
+        }
+        .question {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .options {
+            margin-left: 20px;
+        }
+        .option {
+            margin-bottom: 10px;
+        }
+        .footer-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .result-container {
+            text-align: center;
+            margin-top: 20px;
+            font-family: Arial, sans-serif;
+            width: 50%;
+            padding: 2rem;
+            margin: 0 auto;
+        }
+        .result {
+            font-size: 20px;
+            margin: 20px 0;
+        }
+        .download-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .download-button:hover {
+            background-color: #0056b3;
+        }
+        .cancel-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #8b0000 ;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .cancel-button:hover {
+            background-color: #5a0404 ;
+        }
+        .new-button {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #8b0000 ;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .new-button:hover {
+            background-color: #5a0404 ;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="form-container" id="form-container">
+        <h3>Perfil feminino da Síndrome de Asperger</h3>
+        <!-- O formulário será gerado aqui -->
+    </div>
+
+    <div class="footer-buttons">
+        <button id="clearButton" class="cancel-button">Limpar Tudo</button>
+        <button id="resultButton" class="download-button">Exibir Resultado</button>
+    </div>
+
+    <div class="result-container" id="result-container" style="display: none;">
+        <div id="result"></div>
+        <button id="downloadButton" class="download-button">Baixar Resultado</button>
+        <button id="myButton" class="new-button" onclick="reloadPage()">Voltar</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+
+        // Função para gerar o formulário
+        function generateForm(data) {
+            const formContainer = document.getElementById('form-container');
+            let formHtml = '<form><h2>Perfil feminino da Síndrome de Asperger</h2>';
+
+            data.forEach(section => {
+                formHtml += `<div class="question">${section.title}</div><br>`;
+                formHtml += '<div class="options">';
+
+                section.values.forEach((option, index) => {
+                    formHtml += `
+                        <div class="option">
+                            <input type="checkbox" id="option-${section.title}-${index}" name="question-${section.title}" value="${option}">
+                            <label for="option-${section.title}-${index}">${option}</label>
+                        </div>
+                    `;
+                });
+
+                formHtml += '</div>';
+            });
+
+            formHtml += '</form>';
+            formContainer.innerHTML = formHtml;
+        }
+
+        // Função para exibir resultado
+        function displayResult() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const total = checkboxes.length;
+            const checkedCount = Array.from(checkboxes).filter(checkbox => checkbox.checked).length;
+            const percentage = (checkedCount / total) * 100;
+
+            // Esconder o formulário e mostrar o resultado
+            document.getElementById('form-container').style.display = 'none';
+            document.querySelector('.footer-buttons').style.display = 'none';
+
+            const resultContainer = document.getElementById('result-container');
+            resultContainer.style.display = 'block';
+            resultContainer.querySelector('#result').innerHTML = `
+                <div class="result">
+                    <p>Você marcou ${checkedCount} de ${total} opções.</p> 
+                    <p>Total de ${percentage.toFixed(2)}%.</p>
+                </div>
+            `;
+        }
+
+        // Função para baixar o resultado como imagem
+        function downloadResult() {
+            const resultContainer = document.getElementById('result-container');
+            document.getElementById('downloadButton').style.display = 'none';
+            html2canvas(resultContainer).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'resultado.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+            showButtonAfterDelay()
+        }
+
+        // Função para limpar todos os checkboxes
+        function clearAll() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false; // Desmarca todos os checkboxes
+            });
+        }
+
+        function showButtonAfterDelay() {
+            setTimeout(() => {
+                document.getElementById('myButton').style.display = 'inline-block'; // Exibe o botão
+            }, 1000); // 1000 ms = 1 segundos
+        }
+
+        function reloadPage() {
+            location.reload(); // Recarrega a página
+        }
+
+        // Gerar o formulário
+        generateForm(data);
+
+        // Adicionar eventos
+        document.getElementById('resultButton').addEventListener('click', displayResult);
+        document.getElementById('clearButton').addEventListener('click', clearAll);
+        document.getElementById('downloadButton').addEventListener('click', downloadResult);
+    </script>
+</body>
+</html>
